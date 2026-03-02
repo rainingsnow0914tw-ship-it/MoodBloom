@@ -1,8 +1,16 @@
 # MoodBloom — “a voice… and a companion who writes back”
 
-[![NOVA](https://img.shields.io/badge/NOVA-8A2BE2?style=for-the-badge&logo=amazonaws&logoColor=white)]((https://nova.amazon.com/chat?mons_idp_issuer=AuthPortal&mons_idp_client_id=amzn_agi_hyperion_us))
-
-[![AWS Console](https://img.shields.io/badge/AWS_Console-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white)](https://console.aws.amazon.com/)
+<div align="center">
+  <h3>🚀 Quick Access Dashboard</h3>
+  <br/>
+  <a href="https://nova.amazon.com/chat?mons_idp_issuer=AuthPortal&mons_idp_client_id=amzn_agi_hyperion_us" target="_blank">
+    <img src="https://img.shields.io/badge/Amazon_Nova_Chat-8A2BE2?style=for-the-badge&logo=amazon&logoColor=white" alt="Amazon Nova"/>
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://console.aws.amazon.com/" target="_blank">
+    <img src="https://img.shields.io/badge/AWS_Management_Console-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white" alt="AWS Console"/>
+  </a>
+</div>
 
 A hackathon demo that turns **speech → reflection → supportive reply**, with a gentle UI and an “always-responding” companion.
 
