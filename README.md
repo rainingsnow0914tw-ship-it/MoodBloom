@@ -1,5 +1,7 @@
 # MoodBloom — “a voice… and a companion who writes back”
 
+---
+
 <div align="center">
   <h3>🚀 Quick Access Dashboard</h3>
   <br/>
@@ -11,6 +13,8 @@
     <img src="https://img.shields.io/badge/AWS_Management_Console-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white" alt="AWS Console"/>
   </a>
 </div>
+
+---
 
 A hackathon demo that turns **speech → reflection → supportive reply**, with a gentle UI and an “always-responding” companion.
 
