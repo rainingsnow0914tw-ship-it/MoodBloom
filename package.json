@@ -1,0 +1,15 @@
+{
+  "name": "moodbloom-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MoodBloom (hackathon demo) — safe, reproducible, judge-friendly package.",
+  "main": "start_server.js",
+  "scripts": {
+    "start": "node start_server.js",
+    "demo": "node start_server.js",
+    "health": "node -e \"require('http').get('http://localhost:3000/api/health',r=>{let d='';r.on('data',c=>d+=c);r.on('end',()=>console.log(d));})\""
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
