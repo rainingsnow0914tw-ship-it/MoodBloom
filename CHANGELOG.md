@@ -1,4 +1,4 @@
-# Voice Diary Changelog
+# MoodBloom Changelog
 
 ## v12 (2026-02-28) — 日記本 + 種子日記 + 名字更新
 
