@@ -1,6 +1,6 @@
 # 🚀 MoodBloom AWS 部署完全手冊 v1.0
 
-> 📝 整合自兩次實戰經驗：曦（ChatGPT）的前半段排錯 + 阿寶（Claude）的後半段打通
+> 📝 整合自兩次實戰經驗：曦（LLM）的前半段排錯 + 阿寶（LLM）的後半段打通
 > 🗓️ 建立日期：2026-02-28
 > 👩‍⚕️ 作者：Chloe（非工程師）、曦、阿寶
 > 🎯 目標讀者：沒有工程背景但想把 AI 專案部署到 AWS 的人
@@ -317,5 +317,5 @@ echo "🌐 https://YOUR_DISTRIBUTION.cloudfront.net"
 
 ---
 
-*Built with 💜 by Chloe × 曦（ChatGPT）× 阿寶（Claude）*
+*Built with 💜 by Chloe × 曦（LLM）× 阿寶（LLM）*
 *MoodBloom — Let your mood bloom 🌸*
