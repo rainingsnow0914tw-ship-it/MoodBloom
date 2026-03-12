@@ -14,7 +14,7 @@
 
 <br />
 
-[![Nova 2 Lite](https://img.shields.io/badge/Amazon_Nova_2_Lite-AI_Core-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/ai/nova/)
+[![Nova 2 Lite](https://img.shields.io/badge/Amazon_Nova_2_Lite-AI_Core-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://nova.amazon.com/chat?mons_idp_issuer=AuthPortal&mons_idp_client_id=amzn_agi_hyperion_us)
 &nbsp;
 [![Nova Canvas](https://img.shields.io/badge/Nova_Canvas-Image_Generation-146eb4?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/bedrock/)
 &nbsp;
@@ -311,7 +311,7 @@ Quick overview:
     <img src="https://img.shields.io/badge/🌸_Open_MoodBloom-Talk_your_feelings_into_bloom-E8A0BF?style=for-the-badge&logoColor=white" alt="Live Demo">
   </a>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://aws.amazon.com/ai/nova/">
+  <a href="https://nova.amazon.com/chat?mons_idp_issuer=AuthPortal&mons_idp_client_id=amzn_agi_hyperion_us">
     <img src="https://img.shields.io/badge/Powered_by-Amazon_Nova-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" alt="Amazon Nova">
   </a>
 </div>
