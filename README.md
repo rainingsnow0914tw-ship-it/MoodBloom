@@ -281,7 +281,7 @@ open index.html        # Or use Live Server in VS Code
 
 ## ☁️ AWS Deployment
 
-Full deployment guide → [`DEPLOYMENT.md`](./DEPLOYMENT.md)
+Full deployment guide → [`AWS_DEPLOYMENT_GUIDE.md`](./AWS_DEPLOYMENT_GUIDE.md)
 
 Quick overview:
 1. **S3** — upload frontend files
