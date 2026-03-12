@@ -5,16 +5,11 @@ const { useState, useRef, useEffect, useCallback } = React;
 // ║  API Key 由後端管理（.env / Lambda env），前端不存 key     ║
 // ║  所有請求走 /api/nova → 後端 proxy 轉發到 Nova API        ║
 // ╚══════════════════════════════════════════════════════════╝
-// 自動偵測環境：本機預設走 /api/nova（由 start_server.js 提供）
+// 自動偵測環境：本機用 proxy，AWS 用 API Gateway 完整 URL
 const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-// 可選：在 index.html 透過 window.MOODBLOOM_CONFIG 設定 apiUrl（例如你的 API Gateway URL）
-// Example:
-//   window.MOODBLOOM_CONFIG = { apiUrl: 'https://YOUR_API_ID.execute-api.REGION.amazonaws.com/api/nova' }
-const CONFIG_API_URL = window.MOODBLOOM_CONFIG && window.MOODBLOOM_CONFIG.apiUrl;
-
-// 預設永遠用相對路徑，確保 repo clone 下來就能跑（沒有 key 也能 Offline Demo）
-const NOVA_API_URL = (CONFIG_API_URL && String(CONFIG_API_URL).trim()) ? CONFIG_API_URL : '/api/nova';
+const NOVA_API_URL = IS_LOCAL
+    ? '/api/nova'                                                              // 本機: start_server.js proxy
+    : 'https://pu8jjg8836.execute-api.us-east-1.amazonaws.com/api/nova';       // AWS: API Gateway + Lambda
 const NOVA_MODEL = 'nova-2-lite-v1';
 
 // ⚠️ 語音辨識需要 HTTPS 或 localhost，file:// 不支援
@@ -687,12 +682,15 @@ function MoodBloom() {
         }
     }, [isSpeaking, isLoading]);
 
-    const stopRecording = () => {
+    const stopRecording = (opts = {}) => {
+        const { resetEmotion = true } = opts;
         voiceModeRef.current = false;
         clearTimeout(autoSendRef.current);
         clearTimeout(recognitionRef.current?._warmupTimer);
         if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch(e) {} }
-        setIsRecording(false); setCatEmotion('happy'); setStatusMessage(''); pendingTextRef.current = '';
+        setIsRecording(false);
+        if (resetEmotion) setCatEmotion('happy');
+        setStatusMessage(''); pendingTextRef.current = '';
         srLog('stopped by user');
     };
 
@@ -710,21 +708,32 @@ function MoodBloom() {
         }
     };
 
-    const toggleRecording = async () => {
-        if (isSpeaking || isTypewriting) return;
-        if (isRecording || voiceModeRef.current) { stopRecording(); return; }
-        if (recognitionRef.current) {
-            await warmUpMic();
-            voiceModeRef.current = true;
-            recognitionRef.current.lang = lang === 'zh-TW' ? 'zh-TW' : 'en-US';
-            setIsRecording(true); setCatEmotion('thinking'); setInputText(''); pendingTextRef.current = '';
-            recognitionRef.current.start();
-        }
-    };
+   const toggleRecording = async () => {
+    if (isSpeaking || isTypewriting) return;
+    if (isRecording || voiceModeRef.current) { stopRecording(); return; }
+    if (recognitionRef.current) {
+        await warmUpMic();
+        voiceModeRef.current = true;
+        recognitionRef.current.lang = lang === 'zh-TW' ? 'zh-TW' : 'en-US';
+        // 先不變紅，顯示「準備中」讓 SR 預熱
+        setCatEmotion('thinking');
+        setInputText('');
+        pendingTextRef.current = '';
+        setStatusMessage(lang === 'zh-TW' ? '⏳ 準備中...' : '⏳ Starting...');
+        recognitionRef.current.start();
+        // 500ms 後才變成錄音中（亞紅色），確保 SR 真正就緒
+        setTimeout(() => {
+            if (voiceModeRef.current) {
+                setIsRecording(true);
+                setStatusMessage('');
+            }
+        }, 500);
+    }
+};
 
     // ===== 語音播放（瀏覽器 TTS）=====
     const speakText = (text) => {
-        if (isRecording) stopRecording();
+        if (isRecording) stopRecording({ resetEmotion: false });
         setIsSpeaking(true);
         speakWithBrowserTTS(text, lang, () => setIsSpeaking(false));
     };
@@ -864,7 +873,40 @@ Occasionally use ${userName}'s name naturally.`;
 
             setMessages([...newMessages, { role: 'ai', content: aiResponse }]);
             setConversationHistory([...newHistory, { role: 'ai', content: aiResponse }]);
-            setCatEmotion('happy');
+            // v12.3: 情緒偵測 — 根據「使用者說的話 + AI 回覆」判斷小粉表情
+            // 優先順序：sleepy > sad > love > surprise > happy（越特殊越優先）
+            const detectEmotion = (userText, aiText) => {
+                const combined = (userText + ' ' + aiText).toLowerCase();
+
+                // 😴 sleepy — 累了、想睡、深夜
+                const sleepyWords = ['累','好累','想睡','睡不著','失眠','好晚','深夜','熬夜','沒精神','疲',
+                    'tired','exhausted','sleepy','can\'t sleep','insomnia','late night','so late','no energy','drained','worn out'];
+                if (sleepyWords.some(w => combined.includes(w))) return 'sleepy';
+
+                // 😿 sad — 悲傷、壓力、孤單
+                const sadWords = ['難過','傷心','哭','壓力','焦慮','孤單','寂寞','沮喪','崩潰','撐不住','不開心','低落','痛','委屈','失落','害怕',
+                    'sad','cry','stress','anxious','lonely','depressed','overwhelm','break down','unhappy','hurt','pain','scared','afraid','worried','grief','heartbreak'];
+                if (sadWords.some(w => combined.includes(w))) return 'sad';
+
+                // 😻 love — 溫暖、感動、感謝
+                const loveWords = ['謝謝','感動','溫暖','愛','喜歡你','有你真好','陪伴','幸福','感恩','珍惜','擁抱',
+                    'thank','grateful','warm','love','appreciate','glad you\'re here','means a lot','touched','blessed','hug','care about'];
+                if (loveWords.some(w => combined.includes(w))) return 'love';
+
+                // 🎉 surprise — 驚喜、興奮
+                const surpriseWords = ['哇','天啊','不敢相信','意外','驚喜','太棒了','超厲害','沒想到',
+                    'wow','amazing','incredible','no way','can\'t believe','awesome','surprise','unexpected','omg','exciting'];
+                if (surpriseWords.some(w => combined.includes(w))) return 'surprise';
+
+                // 😺 happy — 開心、好事
+                const happyWords = ['開心','快樂','高興','好吃','好玩','放鬆','舒服','棒','讚','享受','期待',
+                    'happy','great','enjoy','fun','relax','nice','wonderful','good time','excited','looking forward'];
+                if (happyWords.some(w => combined.includes(w))) return 'happy';
+
+                return 'happy';
+            };
+
+            setCatEmotion(detectEmotion(userMessage, aiResponse));
             speakText(aiResponse);
         } catch (error) {
             setMessages([...newMessages, { role: 'ai', content: t.error + error.message }]);
@@ -1011,27 +1053,39 @@ BANNED: Never use "reading your diary" or "from your words". Never end with just
                 { role: 'system', content: letterPrompt },
                 { role: 'user', content: `日記 / Diary:\n${diary}\n\n請寫回信 / Write the letter:` }
             ], 0.8, 1024);  // v7: 從 512 增到 1024，讓回信有足夠空間寫長
-            // v8: 清理回信中的無效 Unicode（修復 ��� 亂碼）
+            // v8: 清理回信中的無效 Unicode（修復     亂碼）
             const cleanLetter = letter.replace(/[\uFFFD\uFFFE\uFFFF]/g, '').trim();
             setAiReverseDiary(cleanLetter);
 
-            // ===== v6: 用 Nova 萃取畫面 → Pollinations 生成配圖 =====
-            // 流程：日記 → Nova 提取一句英文場景描述 → Pollinations 免費生圖
+            // ===== v7: 用 Nova 萃取畫面 → Nova Canvas 生成配圖 =====
+            // 流程：日記 → Nova 提取一句英文場景描述 → Lambda /api/image → Nova Canvas
             try {
                 const imagePromptText = await callNovaAPI([
                     { role: 'system', content: `You are an image prompt generator. Read the diary below and describe ONE warm, cozy scene from it in a single English sentence (max 30 words). Style: soft watercolor illustration, warm pastel colors, gentle lighting, Studio Ghibli inspired. Do NOT include any text or words in the image. Do NOT include any people's faces clearly. Focus on objects, scenery, food, animals, or atmospheric mood.` },
                     { role: 'user', content: `Diary:\n${diary}\n\nWrite ONE image prompt:` }
                 ], 0.9, 100);
-                
-                // 組合 Pollinations URL（免費，無需 API key，直接用 img src）
+
                 const cleanPrompt = imagePromptText
-                    .replace(/["\n\r]/g, ' ')  // 移除引號和換行
-                    .replace(/^(image prompt:|prompt:)/i, '')  // 移除可能的前綴
+                    .replace(/["\n\r]/g, ' ')
+                    .replace(/^(image prompt:|prompt:)/i, '')
                     .trim()
-                    .substring(0, 200);  // 限制長度避免 URL 過長
-                const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=800&height=400&nologo=true`;
-                setDiaryImageUrl(pollinationsUrl);
-                console.log('🎨 配圖 prompt:', cleanPrompt);
+                    .substring(0, 200);
+
+                console.log('🎨 Nova Canvas prompt:', cleanPrompt);
+
+                // 呼叫 Lambda /api/image → Nova Canvas 生圖
+                const imageRes = await fetch('https://pu8jjg8836.execute-api.us-east-1.amazonaws.com/api/image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: cleanPrompt })
+                });
+                const imageData = await imageRes.json();
+                if (imageData.image) {
+                    setDiaryImageUrl(`data:image/png;base64,${imageData.image}`);
+                    console.log('🎨 Nova Canvas 生圖成功！');
+                } else {
+                    setDiaryImageUrl(null);
+                }
             } catch (imgError) {
                 // 配圖失敗不影響日記，靜默忽略
                 console.warn('配圖生成失敗（不影響日記）:', imgError.message);
@@ -1109,7 +1163,7 @@ BANNED: Never use "reading your diary" or "from your words". Never end with just
                 {/* badge removed */}
                 {statusMessage && <div className="status-bar">{statusMessage}</div>}
             </div>
-            <div className="version-tag">v12.2</div>
+            <div className="version-tag">v12.3-emotion-fix-2</div>
             {/* v12.1: SR debug log — collapsible, top-right */}
             {srDebugLog.length > 0 && (
                 <React.Fragment>
