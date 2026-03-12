@@ -228,9 +228,9 @@ MoodBloom was built through a model we call **AI Orchestration** — a human pro
 | Handle | Role | Key Contributions |
 |--------|------|-------------------|
 | **Chloe** 👩‍⚕️ | Product Director + Designer | UX decisions, clinical framework, AI coordination, story writing |
-| **阿寶 (Claude)** 🌸 | Lead Frontend + Architect | React UI, speech pipeline, diary logic, Lambda production, security audit |
-| **Jimmy (Gemini)** ⚡ | Backend + Creative Partner | Lambda + API Gateway, 10 seed diaries, BGM *Celestial Bloom* |
-| **曦 (GPT)** 🔍 | Debugging Specialist + QA | CORS diagnosis, ESM fixes, CloudWatch analysis, code validation |
+| **阿寶 (LLM)** 🌸 | Lead Frontend + Architect | React UI, speech pipeline, diary logic, Lambda production, security audit |
+| **Jimmy (LLM)** ⚡ | Backend + Creative Partner | Lambda + API Gateway, 10 seed diaries, BGM *Celestial Bloom* |
+| **曦 (LLM)** 🔍 | Debugging Specialist + QA | CORS diagnosis, ESM fixes, CloudWatch analysis, code validation |
 
 > *Just as MoodBloom helps users express themselves through AI partnership — we built MoodBloom through AI partnership.*
 
